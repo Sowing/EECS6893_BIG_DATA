@@ -1,0 +1,106 @@
+export WORK_DIR=/tmp/mahout-work-wiki
+mkdir -p ${WORK_DIR}
+mkdir -p ${WORK_DIR}/wikixml
+cd ${WORK_DIR}/wikixml
+root@nan-ThundeRobot:/tmp# cp /home/nan/Downloads/enwiki-articles.xml ${WORK_DIR}/wikixml
+rm -rf ${WORK_DIR}/wiki
+mkdir ${WORK_DIR}/wiki
+root@nan-ThundeRobot:/tmp/mahout-work-wiki# cp $MAHOUT_HOME/examples/bin/resources/country10.txt ${WORK_DIR}/country.txt
+
+hadoop dfs -mkdir -p ${WORK_DIR}
+hadoop dfs -put ${WORK_DIR}/wikixml ${WORK_DIR}/wikixml
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-articles.xml -o ${WORK_DIR}/wikipediainput
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout trainnb -i ${WORK_DIR}/training -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout testnb -i ${WORK_DIR}/training -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -c
+
+
+
+root@nan-ThundeRobot:/tmp/mahout-work-wiki# cp $MAHOUT_HOME/examples/bin/resources/country.txt ${WORK_DIR}/country.txt
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-articles.xml -o ${WORK_DIR}/wikipediainput
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout trainnb -i ${WORK_DIR}/training -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout testnb -i ${WORK_DIR}/training -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -c
+
+
+export WORK_DIR=/tmp/mahout-work-nan
+mkdir -p ${WORK_DIR}
+mkdir -p ${WORK_DIR}/20news-all
+cd ${WORK_DIR}/20news-all
+curl http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz -o ${WORK_DIR}/20news-bydate.tar.gz
+mkdir -p ${WORK_DIR}/20news-bydate
+cd ${WORK_DIR}/20news-bydate && tar xzf ../20news-bydate.tar.gz && cd .. && cd ..
+cp -R ${WORK_DIR}/20news-bydate/*/* ${WORK_DIR}/20news-all
+
+  ./bin/mahout seqdirectory \
+    -i ${WORK_DIR}/20news-all \
+    -o ${WORK_DIR}/20news-seq -ow
+	
+  ./bin/mahout seq2sparse \
+    -i ${WORK_DIR}/20news-seq \
+    -o ${WORK_DIR}/20news-vectors  -lnorm -nv  -wt tfidf
+	
+  ./bin/mahout split \
+    -i ${WORK_DIR}/20news-vectors/tfidf-vectors \
+    --trainingOutput ${WORK_DIR}/20news-train-vectors \
+    --testOutput ${WORK_DIR}/20news-test-vectors  \
+    --randomSelectionPct 40 --overwrite --sequenceFiles -xm sequential
+	
+      ./bin/mahout trainnb \
+        -i ${WORK_DIR}/20news-train-vectors \
+        -o ${WORK_DIR}/model \
+        -li ${WORK_DIR}/labelindex \
+        -ow $c
+
+      ./bin/mahout testnb \
+        -i ${WORK_DIR}/20news-train-vectors\
+        -m ${WORK_DIR}/model \
+        -l ${WORK_DIR}/labelindex \
+        -ow -o ${WORK_DIR}/20news-testing $c
+
+      ./bin/mahout testnb \
+        -i ${WORK_DIR}/20news-test-vectors\
+        -m ${WORK_DIR}/model \
+        -l ${WORK_DIR}/labelindex \
+        -ow -o ${WORK_DIR}/20news-testing $c
+
+./bin/mahout org.apache.mahout.classifier.sgd.TrainNewsGroups ${WORK_DIR}/20news-bydate/20news-bydate-train/
+./bin/mahout org.apache.mahout.classifier.sgd.TestNewsGroups --input ${WORK_DIR}/20news-bydate/20news-bydate-test/ --model /tmp/news-group.model
+
+	
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-articles.xml -o ${WORK_DIR}/wikipediainput
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout trainnb -i ${WORK_DIR}/training -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout testnb -i ${WORK_DIR}/training -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -c
+
+
+
+root@nan-ThundeRobot:/tmp/mahout-work-wiki# cp $MAHOUT_HOME/examples/bin/resources/country.txt ${WORK_DIR}/country.txt
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seqwiki -c ${WORK_DIR}/country.txt -i ${WORK_DIR}/wikixml/enwiki-articles.xml -o ${WORK_DIR}/wikipediainput
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout seq2sparse -i ${WORK_DIR}/wikipediainput -o ${WORK_DIR}/wikipediaVecs -wt tfidf -lnorm -nv -ow -ng 2
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout split -i ${WORK_DIR}/wikipediaVecs/tfidf-vectors/ --trainingOutput ${WORK_DIR}/training --testOutput ${WORK_DIR}/testing -rp 20 -ow -seq -xm sequential
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout trainnb -i ${WORK_DIR}/training -o ${WORK_DIR}/model -li ${WORK_DIR}/labelindex -ow -c
+
+root@nan-ThundeRobot:/usr/local/lib/mahout/bin# ./mahout testnb -i ${WORK_DIR}/training -m ${WORK_DIR}/model -l ${WORK_DIR}/labelindex -ow -o ${WORK_DIR}/output -c
